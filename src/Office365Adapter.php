@@ -108,6 +108,30 @@ class Office365Adapter implements AdapterInterface
         return $api;
     }
 
+    /** {@inheritDoc} */
+    public function getTaskApi()
+    {
+        static $api = null;
+
+        if (null === $api) {
+            $api = new Api\TaskApi($this);
+        }
+
+        return $api;
+    }
+
+    /** {@inheritDoc} */
+    public function getTaskGroupApi()
+    {
+        static $api = null;
+
+        if (null === $api) {
+            $api = new Api\TaskGroupApi($this);
+        }
+
+        return $api;
+    }
+
     /**
      * Build a User object based on given data
      *
