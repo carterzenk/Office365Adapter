@@ -5,7 +5,7 @@ namespace CalendArt\Adapter\Office365\Api;
 use CalendArt\Adapter\MailApiInterface;
 use CalendArt\Adapter\Office365\Model\Message;
 use CalendArt\Adapter\Office365\Office365Adapter;
-use Doctrine\Common\Collections\ArrayCollection;
+use CalendArt\Adapter\Office365\Model\MessageSet;
 
 class MailApi implements MailApiInterface
 {
@@ -24,27 +24,26 @@ class MailApi implements MailApiInterface
     }
 
     /** {@inheritDoc} */
-    public function getList($search, $pageToken = null)
+    public function getList($search = '', $pageToken = '')
     {
-        $headers = [];
+        $url = '/messages';
+        $params = [];
 
-        if (isset($search)) {
-            $headers['query']['search'] = $search;
+        if (!empty($search)) {
+            $params['$search'] = $search;
         }
 
-        if (isset($pageToken)) {
-            $headers['query']['skipToken'] = $pageToken;
+        if (!empty($pageToken)) {
+            $params['$skipToken'] = $pageToken;
         }
 
-        $result = $this->adapter->sendRequest('get', '/messages', $headers);
-
-        $list = new ArrayCollection;
-
-        foreach ($result['value'] as $item) {
-            $list[$item['id']] = Message::hydrate($item);
+        if (!empty($params)) {
+            $url .= http_build_query($params);
         }
 
-        return $list;
+        $result = $this->adapter->sendRequest('get', $url);
+
+        return MessageSet::hydrate($result);
     }
 
     /** {@inheritDoc} */
