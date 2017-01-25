@@ -5,7 +5,6 @@ namespace CalendArt\Adapter\Office365\Api;
 use CalendArt\AbstractTask;
 use CalendArt\Adapter\Office365\Office365Adapter;
 use CalendArt\Adapter\TaskApiInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 
 class TaskApi implements TaskApiInterface
 {
@@ -28,7 +27,7 @@ class TaskApi implements TaskApiInterface
      */
     public function getList()
     {
-        //TODO: Implement getList function
+        //TODO: Implement getList function.
     }
 
     /**

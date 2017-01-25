@@ -109,27 +109,27 @@ class Office365Adapter implements AdapterInterface
     }
 
     /** {@inheritDoc} */
-    public function getTaskApi()
+    public function getMailApi()
     {
         static $api = null;
 
         if (null === $api) {
-            $api = new Api\TaskApi($this);
+            $api = new Api\MailApi($this);
         }
 
         return $api;
     }
 
     /** {@inheritDoc} */
+    public function getTaskApi()
+    {
+        throw new \Exception('The Microsoft Graph Task API is still in beta');
+    }
+
+    /** {@inheritDoc} */
     public function getTaskGroupApi()
     {
-        static $api = null;
-
-        if (null === $api) {
-            $api = new Api\TaskGroupApi($this);
-        }
-
-        return $api;
+        throw new \Exception('The Microsoft Graph Task API is still in beta');
     }
 
     /**
