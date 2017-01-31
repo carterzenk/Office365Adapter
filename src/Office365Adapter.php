@@ -56,7 +56,12 @@ class Office365Adapter implements AdapterInterface
     /** @var User[] All the fetched and hydrated users, with an id as a key **/
     protected static $users = [];
 
-    /** @param string $token access token delivered by azure's oauth system */
+    /**
+     * @param string $token access token delivered by azure's oauth system
+     * @param HttpClient $client
+     * @param MessageFactory $messageFactory
+     * @param UriFactory $uriFactory
+     */
     public function __construct(
         $token,
         HttpClient $client = null,
@@ -169,7 +174,7 @@ class Office365Adapter implements AdapterInterface
         $result = json_decode($response->getBody(), true);
 
         if (null === $result) {
-            throw new Exception\BackendException($response);
+            throw new \Exception($response);
         }
 
         return $result;

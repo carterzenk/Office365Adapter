@@ -23,7 +23,9 @@ class MailApi implements MailApiInterface
         $this->adapter = $adapter;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public function getList($search = '', $pageToken = '')
     {
         $url = '/messages';
@@ -46,7 +48,9 @@ class MailApi implements MailApiInterface
         return MessageSet::hydrate($result);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public function get($identifier)
     {
         $result = $this->adapter->sendRequest('get', sprintf('/messages/%s', $identifier));

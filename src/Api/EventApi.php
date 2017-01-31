@@ -31,14 +31,25 @@ use CalendArt\Adapter\Office365\Office365Adapter;
  */
 class EventApi implements EventApiInterface
 {
-    /** @var Office365Adapter Office365 Adapter used */
+    /**
+     * @var Office365Adapter Office365 Adapter used
+     */
     private $adapter;
 
+    /**
+     * EventApi constructor.
+     * @param Office365Adapter $adapter
+     */
     public function __construct(Office365Adapter $adapter)
     {
         $this->adapter = $adapter;
     }
 
+    /**
+     * @param $url
+     * @param array $headers
+     * @return ArrayCollection
+     */
     private function requestEvents($url, array $headers = [])
     {
         $result = $this->adapter->sendRequest('get', $url, $headers);
@@ -90,11 +101,14 @@ class EventApi implements EventApiInterface
      * If a calendar is given, it fetches the events for this calendar ;
      * otherwise, it takes the primary
      *
+     * @param Calendar $calendar
      * @param DateTime $from The date and time when the event starts.
      * @param DateTime $to The date and time when the event ends.
      * @param string $filter `$filter` query parameter to give to the request
      * @param string $orderBy `$orderBy` query, to have an order of elements
      *
+     * @param array $extraParameters
+     * @return ArrayCollection
      * @see https://msdn.microsoft.com/office/office365/APi/calendar-rest-operations#GetCalendarView
      */
     public function getCalendarView(
@@ -129,14 +143,18 @@ class EventApi implements EventApiInterface
         return $this->requestEvents($url, $params);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public function get($identifier)
     {
         $result = $this->adapter->sendRequest('get', sprintf('/events/%s', $identifier));
         return Event::hydrate($result);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public function persist(AbstractEvent $event, array $options = [])
     {
         if (!$event instanceof Event) {
