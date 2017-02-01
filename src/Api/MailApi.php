@@ -40,7 +40,7 @@ class MailApi implements MailApiInterface
         }
 
         if (!empty($params)) {
-            $url .= http_build_query($params);
+            $url .= '?' . http_build_query($params);
         }
 
         $result = $this->adapter->sendRequest('get', $url);
