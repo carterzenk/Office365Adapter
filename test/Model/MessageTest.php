@@ -11,7 +11,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
             'createdDateTime' => '2017-01-05T10:37:21Z',
             'subject' => 'Example',
             'body' => [
-                'contentType' => 'Text',
+                'contentType' => 'text',
                 'content' => 'example content'
             ],
             'bodyPreview' => 'example...',
@@ -58,7 +58,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
             'createdDateTime' => '2017-01-05T10:37:21Z',
             'subject' => 'Example',
             'body' => [
-                'contentType' => 'HTML',
+                'contentType' => 'html',
                 'content' => '<p>example content</p>'
             ],
             'bodyPreview' => 'example...',
