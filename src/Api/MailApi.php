@@ -36,7 +36,7 @@ class MailApi implements MailApiInterface
         }
 
         if (!empty($pageToken)) {
-            $params['$skipToken'] = $pageToken;
+            $params['$skiptoken'] = $pageToken;
         }
 
         if (!empty($pageSize)) {
