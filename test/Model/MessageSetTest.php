@@ -13,7 +13,7 @@ class MessageSetTest extends \PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->data = [
-            '@odata.nextLink' => 'https://graph.microsoft.com/v1.0/messages/me?$skipToken=Ajde9DHUwkxk-sa&$search="example"',
+            '@odata.nextLink' => 'https://graph.microsoft.com/v1.0/messages/me?$skiptoken=Ajde9DHUwkxk-sa&$search="example"',
             'value' => [
                 [
                     'id' => "fdsfh278392hf-9hf9dsh8hs",
