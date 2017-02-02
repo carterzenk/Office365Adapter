@@ -55,6 +55,9 @@ class Event extends AbstractEvent
     /** @var string */
     protected $id;
 
+    /** @var bool */
+    private $allDay = false;
+
     /** @var string[] */
     private $categories = [];
 
@@ -182,6 +185,18 @@ class Event extends AbstractEvent
         }
 
         $this->importance = $importance;
+    }
+
+    /** @return boolean */
+    public function getAllDay()
+    {
+        return $this->allDay;
+    }
+
+    /** @param boolean $allDay */
+    public function setAllDay($allDay)
+    {
+        $this->allDay = $allDay;
     }
 
     /** @return boolean */
@@ -352,6 +367,8 @@ class Event extends AbstractEvent
                 return $participation->export();
             })->toArray()
         ];
+
+        $export['isAllDay'] = $this->getAllDay();
 
         if (null !== $this->getStart()) {
             $export['start'] = ['dateTime' => $this->getStart()->format('c'), 'timeZone' => 'UTC'];
