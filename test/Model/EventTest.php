@@ -95,4 +95,36 @@ class EventTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull($event->getOwner());
     }
+
+    public function testSetStartWithNoEnd()
+    {
+        $event = new Event();
+        $dt = new \DateTime();
+        $event->setStart($dt);
+        $this->assertEquals($dt, $event->getStart());
+    }
+
+    public function testStartWithEndBeforeThrowsException()
+    {
+        $event = new Event();
+        $event->setEnd(new \DateTime('-1 hours'));
+        $this->expectException(\Exception::class);
+        $event->setStart(new \DateTime());
+    }
+
+    public function testSetEndWithNoStart()
+    {
+        $event = new Event();
+        $dt = new \DateTime();
+        $event->setEnd($dt);
+        $this->assertEquals($dt, $event->getEnd());
+    }
+
+    public function testEndWithStartAfterThrowsException()
+    {
+        $event = new Event();
+        $event->setStart(new \DateTime('+1 hours'));
+        $this->expectException(\Exception::class);
+        $event->setEnd(new \DateTime());
+    }
 }
