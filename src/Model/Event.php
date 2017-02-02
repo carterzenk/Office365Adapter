@@ -241,7 +241,22 @@ class Event extends AbstractEvent
         $this->type = $type;
     }
 
-    /** @return $this */
+    /** @return string */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /** @param string $location */
+    public function setLocation($location)
+    {
+        $this->location = $location;
+    }
+
+    /**
+     * @param BaseEventParticipation $participation
+     * @return $this
+     */
     public function addParticipation(BaseEventParticipation $participation)
     {
         if (!$participation instanceof EventParticipation) {
@@ -260,7 +275,8 @@ class Event extends AbstractEvent
      * Hydrate a new Event object with data received from Office365 api
      *
      * @param array $data Data to feed the Event object with
-     * @return self
+     * @param Calendar $calendar
+     * @return Event
      */
     public static function hydrate(array $data, Calendar $calendar = null)
     {
@@ -363,12 +379,14 @@ class Event extends AbstractEvent
             'subject' => $this->getName(),
             'bodyPreview' => $this->getDescription(),
             'changeKey' => $this->getEtag(),
+            'isAllDay' => $this->getAllDay(),
+            'location' => [
+                'displayName' => $this->getLocation()
+            ],
             'attendees' => $this->getParticipations()->map(function (EventParticipation $participation) {
                 return $participation->export();
             })->toArray()
         ];
-
-        $export['isAllDay'] = $this->getAllDay();
 
         if (null !== $this->getStart()) {
             $export['start'] = ['dateTime' => $this->getStart()->format('c'), 'timeZone' => 'UTC'];
