@@ -30,17 +30,34 @@ class WindowsTimezoneTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \CalendArt\Adapter\Office365\Exception\InvalidTimezoneException
      */
-    public function testGetTimezoneWithUnregisteredTimezone()
+    public function testGetIanaTimezoneWithUnregisteredWindowsTimezone()
     {
         $windowsTimezone = new WindowsTimezone();
-        $windowsTimezone->getTimezone('foo');
+        $windowsTimezone->getIanaTimezone('foo');
     }
 
-    public function testGetTimezoneWithRegisteredTimezone()
+    public function testGetIanaTimezoneWithRegisteredWindowsTimezone()
     {
         $windowsTimezone = new WindowsTimezone();
-        $timeZone = $windowsTimezone->getTimezone('Samoa Standard Time');
+        $timeZone = $windowsTimezone->getIanaTimezone('Samoa Standard Time');
 
         $this->assertEquals('Pacific/Apia', $timeZone);
+    }
+
+    /**
+     * @expectedException \CalendArt\Adapter\Office365\Exception\InvalidTimezoneException
+     */
+    public function testGetWindowsTimezoneWithUnregisteredIanaTimezone()
+    {
+        $windowsTimezone = new WindowsTimezone();
+        $windowsTimezone->getWindowsTimezone('foo');
+    }
+
+    public function testGetWindowsTimezoneWithRegisteredIanaTimezone()
+    {
+        $windowsTimezone = new WindowsTimezone();
+        $timeZone = $windowsTimezone->getWindowsTimezone('Pacific/Apia');
+
+        $this->assertEquals('Samoa Standard Time', $timeZone);
     }
 }

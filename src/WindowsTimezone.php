@@ -92,20 +92,46 @@ class WindowsTimezone
     ];
 
     /**
-     * return a valid IANA timezone
+     * Return a valid IANA timezone from a Windows timezone
      *
-     * @param string $windowsTimezone timezone in widows format
-     *
-     * @return string
+     * @param string $windowsTimezone timezone in Windows format
+     * @return string The timezone in IANA format
+     * @throws InvalidTimezoneException
      */
-    public function getTimezone($windowsTimezone)
+    public function getIanaTimezone($windowsTimezone)
     {
-        if (isset(self::$timezone[$windowsTimezone])) {
-            $windowsTimezone = self::$timezone[$windowsTimezone];
+        if (!isset(self::$timezone[$windowsTimezone])) {
+            throw new InvalidTimezoneException(
+                sprintf("The Windows timezone %s does not exist in this version.", $windowsTimezone)
+            );
         }
 
-        if (!in_array($windowsTimezone, \DateTimeZone::listIdentifiers())) {
-            throw new InvalidTimezoneException(sprintf("the timezone %s does not exists in your installation", $windowsTimezone));
+        $ianaTimezone = self::$timezone[$windowsTimezone];
+
+        if (!in_array($ianaTimezone, \DateTimeZone::listIdentifiers())) {
+            throw new InvalidTimezoneException(
+                sprintf("The IANA timezone %s does not exists in your installation", $ianaTimezone)
+            );
+        }
+
+        return $ianaTimezone;
+    }
+
+    /**
+     * Return a valid Windows timezone from an IANA timezone
+     *
+     * @param string $ianaTimezone timezone in IANA format
+     * @return string The timezone in Windows format
+     * @throws InvalidTimezoneException
+     */
+    public function getWindowsTimezone($ianaTimezone)
+    {
+        $windowsTimezone = array_search($ianaTimezone, self::$timezone);
+
+        if ($windowsTimezone === false) {
+            throw new InvalidTimezoneException(
+                sprintf("The IANA timezone %s does not exists in this version", $ianaTimezone)
+            );
         }
 
         return $windowsTimezone;

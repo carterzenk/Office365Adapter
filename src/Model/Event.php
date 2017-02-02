@@ -301,9 +301,11 @@ class Event extends AbstractEvent
             $event->description = $data['bodyPreview'];
         }
 
-        if (strtolower($data['body']['contentType']) === 'text') {
-            if (!empty($data['body']['content'])) {
-                $event->description = $data['body']['content'];
+        if (isset($data['body'])) {
+            if (strtolower($data['body']['contentType']) === 'text') {
+                if (!empty($data['body']['content'])) {
+                    $event->description = $data['body']['content'];
+                }
             }
         }
 
@@ -319,11 +321,11 @@ class Event extends AbstractEvent
         $endTimeZone = new DateTimeZone('UTC');
 
         try {
-            $endTimeZone = new DateTimeZone($windowsTimezone->getTimezone($data['end']['timeZone']));
+            $endTimeZone = new DateTimeZone($windowsTimezone->getIanaTimezone($data['end']['timeZone']));
         } catch (Exception $e) { }
 
         try {
-            $startTimeZone = new DateTimeZone($windowsTimezone->getTimezone($data['start']['timeZone']));
+            $startTimeZone = new DateTimeZone($windowsTimezone->getIanaTimezone($data['start']['timeZone']));
         } catch (Exception $e) { }
 
         if (isset($data['start']) && isset($data['start']['dateTime'])) {
@@ -402,12 +404,20 @@ class Event extends AbstractEvent
             })->toArray()
         ];
 
+        $timezoneHelper = new WindowsTimezone();
+
         if (null !== $this->getStart()) {
-            $export['start'] = ['dateTime' => $this->getStart()->format('c'), 'timeZone' => 'UTC'];
+            $export['start'] = [
+                'dateTime' => $this->getStart()->format('Y-m-d\TH:i:s'),
+                'timeZone' => $timezoneHelper->getWindowsTimezone($this->getStart()->getTimezone()->getName())
+            ];
         }
 
         if (null !== $this->getEnd()) {
-            $export['end'] = ['dateTime' => $this->getEnd()->format('c'), 'timeZone' => 'UTC'];
+            $export['end'] = [
+                'dateTime' => $this->getEnd()->format('Y-m-d\TH:i:s'),
+                'timeZone' => $timezoneHelper->getWindowsTimezone($this->getStart()->getTimezone()->getName())
+            ];
         }
 
         if (null !== $this->getId()) {
