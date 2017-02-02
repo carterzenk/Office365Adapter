@@ -80,7 +80,7 @@ class Event extends AbstractEvent
     private $importance = self::IMPORTANCE_NORMAL;
 
     /** @var string Where the event is supposed to happen */
-    public $location;
+    private $location;
 
     /** @var boolean */
     private $cancelled = false;
@@ -90,6 +90,9 @@ class Event extends AbstractEvent
 
     /** @var array */
     private $raw;
+
+    /** @var string */
+    private $htmlBody;
 
     public function __construct(Calendar $calendar = null)
     {
@@ -102,6 +105,7 @@ class Event extends AbstractEvent
         $this->participations = new ArrayCollection;
     }
 
+    /** @return string */
     public function getId()
     {
         return $this->id;
@@ -297,6 +301,12 @@ class Event extends AbstractEvent
             $event->description = $data['bodyPreview'];
         }
 
+        if (strtolower($data['body']['contentType']) === 'text') {
+            if (!empty($data['body']['content'])) {
+                $event->description = $data['body']['content'];
+            }
+        }
+
         if (isset($data['location']) && isset($data['location']['displayName'])) {
             $event->location = $data['location']['displayName'];
         }
@@ -378,6 +388,10 @@ class Event extends AbstractEvent
         $export = [
             'subject' => $this->getName(),
             'bodyPreview' => $this->getDescription(),
+            'body' => [
+                'contentType' => 'text',
+                'content' => $this->getDescription()
+            ],
             'changeKey' => $this->getEtag(),
             'isAllDay' => $this->getAllDay(),
             'location' => [
