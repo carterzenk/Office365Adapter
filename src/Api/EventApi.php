@@ -162,7 +162,14 @@ class EventApi implements EventApiInterface
         }
 
         $method = 'POST';
-        $url = sprintf('/calendars/%s/events', $event->getCalendar()->getId());
+
+        $url = '/events';
+
+        if (null !== $event->getCalendar()) {
+            $url = sprintf('/calendars/%s/events', $event->getCalendar()->getId());
+        }
+
+
         if (null !== $event->getId()) {
             $method = 'PATCH';
             $url = sprintf('%s/%s', $url, $event->getId());
