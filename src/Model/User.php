@@ -48,7 +48,7 @@ class User extends BaseUser
     public static function hydrate(array $data)
     {
         if (!isset($data['address'], $data['name'])) {
-            throw new InvalidArgumentException(sprintf('Missing some required key (required : [\'address\', \'name\'], got [\'%s\'])', array_keys($data)));
+            throw new InvalidArgumentException(sprintf('Missing some required key (required : [\'address\', \'name\'], got [\'%s\'])', implode(', ', array_keys($data))));
         }
 
         $user = new static($data['name'], $data['address']);
