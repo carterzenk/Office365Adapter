@@ -26,7 +26,7 @@ class MailApi implements MailApiInterface
     /**
      * {@inheritDoc}
      */
-    public function getList($search = '', $pageToken = '')
+    public function getList($search = '', $pageToken = '', $pageSize = 10)
     {
         $url = '/messages';
         $params = [];
@@ -36,11 +36,15 @@ class MailApi implements MailApiInterface
         }
 
         if (!empty($pageToken)) {
-            $params['$skipToken'] = $pageToken;
+            $params['$skiptoken'] = $pageToken;
+        }
+
+        if (!empty($pageSize)) {
+            $params['$top'] = $pageSize;
         }
 
         if (!empty($params)) {
-            $url .= http_build_query($params);
+            $url .= '?' . http_build_query($params);
         }
 
         $result = $this->adapter->sendRequest('get', $url);

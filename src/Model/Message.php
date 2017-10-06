@@ -41,9 +41,11 @@ class Message extends AbstractMessage
         }
 
         if (isset($data['body']['contentType']) && isset($data['body']['content'])) {
-            if ($data['body']['contentType'] === 'Text') {
+            $contentType = strtolower($data['body']['contentType']);
+
+            if ($contentType === 'text') {
                 $message->textBody = $data['body']['content'];
-            } elseif ($data['body']['contentType'] === 'HTML') {
+            } elseif ($contentType === 'html') {
                 $message->htmlBody = $data['body']['content'];
             }
         }

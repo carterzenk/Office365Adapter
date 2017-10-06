@@ -21,6 +21,10 @@ class MessageSet extends CalendArtMessageSet
             if (isset($query['$skipToken'])) {
                 $skipToken = $query['$skipToken'];
             }
+
+            if (isset($query['$skiptoken'])) {
+                $skipToken = $query['$skiptoken'];
+            }
         }
 
         $messageSet = new static($skipToken);

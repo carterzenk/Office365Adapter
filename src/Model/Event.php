@@ -55,6 +55,9 @@ class Event extends AbstractEvent
     /** @var string */
     protected $id;
 
+    /** @var bool */
+    private $allDay = false;
+
     /** @var string[] */
     private $categories = [];
 
@@ -77,7 +80,7 @@ class Event extends AbstractEvent
     private $importance = self::IMPORTANCE_NORMAL;
 
     /** @var string Where the event is supposed to happen */
-    public $location;
+    private $location;
 
     /** @var boolean */
     private $cancelled = false;
@@ -87,6 +90,9 @@ class Event extends AbstractEvent
 
     /** @var array */
     private $raw;
+
+    /** @var string */
+    private $htmlBody;
 
     public function __construct(Calendar $calendar = null)
     {
@@ -99,6 +105,7 @@ class Event extends AbstractEvent
         $this->participations = new ArrayCollection;
     }
 
+    /** @return string */
     public function getId()
     {
         return $this->id;
@@ -185,6 +192,18 @@ class Event extends AbstractEvent
     }
 
     /** @return boolean */
+    public function getAllDay()
+    {
+        return $this->allDay;
+    }
+
+    /** @param boolean $allDay */
+    public function setAllDay($allDay)
+    {
+        $this->allDay = $allDay;
+    }
+
+    /** @return boolean */
     public function isCancelled()
     {
         return true === $this->cancelled;
@@ -226,7 +245,22 @@ class Event extends AbstractEvent
         $this->type = $type;
     }
 
-    /** @return $this */
+    /** @return string */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /** @param string $location */
+    public function setLocation($location)
+    {
+        $this->location = $location;
+    }
+
+    /**
+     * @param BaseEventParticipation $participation
+     * @return $this
+     */
     public function addParticipation(BaseEventParticipation $participation)
     {
         if (!$participation instanceof EventParticipation) {
@@ -245,7 +279,8 @@ class Event extends AbstractEvent
      * Hydrate a new Event object with data received from Office365 api
      *
      * @param array $data Data to feed the Event object with
-     * @return self
+     * @param Calendar $calendar
+     * @return Event
      */
     public static function hydrate(array $data, Calendar $calendar = null)
     {
@@ -266,6 +301,14 @@ class Event extends AbstractEvent
             $event->description = $data['bodyPreview'];
         }
 
+        if (isset($data['body'])) {
+            if (strtolower($data['body']['contentType']) === 'text') {
+                if (!empty($data['body']['content'])) {
+                    $event->description = $data['body']['content'];
+                }
+            }
+        }
+
         if (isset($data['location']) && isset($data['location']['displayName'])) {
             $event->location = $data['location']['displayName'];
         }
@@ -278,11 +321,11 @@ class Event extends AbstractEvent
         $endTimeZone = new DateTimeZone('UTC');
 
         try {
-            $endTimeZone = new DateTimeZone($windowsTimezone->getTimezone($data['end']['timeZone']));
+            $endTimeZone = new DateTimeZone($windowsTimezone->getIanaTimezone($data['end']['timeZone']));
         } catch (Exception $e) { }
 
         try {
-            $startTimeZone = new DateTimeZone($windowsTimezone->getTimezone($data['start']['timeZone']));
+            $startTimeZone = new DateTimeZone($windowsTimezone->getIanaTimezone($data['start']['timeZone']));
         } catch (Exception $e) { }
 
         if (isset($data['start']) && isset($data['start']['dateTime'])) {
@@ -347,18 +390,34 @@ class Event extends AbstractEvent
         $export = [
             'subject' => $this->getName(),
             'bodyPreview' => $this->getDescription(),
+            'body' => [
+                'contentType' => 'text',
+                'content' => $this->getDescription()
+            ],
             'changeKey' => $this->getEtag(),
+            'isAllDay' => $this->getAllDay(),
+            'location' => [
+                'displayName' => $this->getLocation()
+            ],
             'attendees' => $this->getParticipations()->map(function (EventParticipation $participation) {
                 return $participation->export();
             })->toArray()
         ];
 
+        $timezoneHelper = new WindowsTimezone();
+
         if (null !== $this->getStart()) {
-            $export['start'] = ['dateTime' => $this->getStart()->format('c'), 'timeZone' => 'UTC'];
+            $export['start'] = [
+                'dateTime' => $this->getStart()->format('Y-m-d\TH:i:s'),
+                'timeZone' => $timezoneHelper->getWindowsTimezone($this->getStart()->getTimezone()->getName())
+            ];
         }
 
         if (null !== $this->getEnd()) {
-            $export['end'] = ['dateTime' => $this->getEnd()->format('c'), 'timeZone' => 'UTC'];
+            $export['end'] = [
+                'dateTime' => $this->getEnd()->format('Y-m-d\TH:i:s'),
+                'timeZone' => $timezoneHelper->getWindowsTimezone($this->getStart()->getTimezone()->getName())
+            ];
         }
 
         if (null !== $this->getId()) {
