@@ -32,7 +32,7 @@ class MailApi implements MailApiInterface
         $params = [];
 
         if (!empty($search)) {
-            $params['$search'] = $search;
+            $params['$search'] = '"'.$search.'"';
         }
 
         if (!empty($pageToken)) {

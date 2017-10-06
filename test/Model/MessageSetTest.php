@@ -58,4 +58,14 @@ class MessageSetTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $messageSet->getMessages()->count());
         $this->assertInstanceOf(Message::class, $messageSet->getMessages()->first());
     }
+
+    public function testHydrateSkipTokenLowercase()
+    {
+        $data = array_merge($this->data, [
+            '@odata.nextLink' => 'https://graph.microsoft.com/v1.0/me/messages?$search=%22example%22&$skiptoken=MSZZVlF4YTFwcVRUUlBSR3MxVFhreGFGbFVTVFJNVkZFelQwZEZkRTlIVVhoYVF6RnNXa2ROZWxwSFZYZE5WR3MwVFVSWmJXTjZNSGhOUVQwOQ%3d%3d',
+        ]);
+
+        $messageSet = MessageSet::hydrate($data);
+        $this->assertEquals('MSZZVlF4YTFwcVRUUlBSR3MxVFhreGFGbFVTVFJNVkZFelQwZEZkRTlIVVhoYVF6RnNXa2ROZWxwSFZYZE5WR3MwVFVSWmJXTjZNSGhOUVQwOQ==', $messageSet->getNextPageToken());
+    }
 }
