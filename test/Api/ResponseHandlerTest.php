@@ -11,55 +11,84 @@ class ResponseHandlerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->response = $this->prophesize(ResponseInterface::class);
+        $this->response = $this->getMockBuilder(ResponseInterface::class)
+            ->setMethods([
+                'getStatusCode',
+                'getBody'
+            ])
+            ->getMockForAbstractClass();
+
         $this->api = new Api;
     }
 
     public function testHandleErrorsWithSuccessfulResponse()
     {
-        $this->response->getStatusCode()->shouldBeCalled()->willReturn(200);
-        $this->api->get($this->response->reveal());
+        $this->response->expects($this->any())
+            ->method('getStatusCode')
+            ->will($this->returnValue(200));
 
-        $this->response->getStatusCode()->shouldBeCalled()->willReturn(301);
-        $this->api->get($this->response->reveal());
+        $this->api->get($this->response);
+
+        $this->response->expects($this->any())
+            ->method('getStatusCode')
+            ->will($this->returnValue(301));
+
+        $this->api->get($this->response);
     }
 
     /**
      * @dataProvider getResponses
      */
-    public function testHandleErrors($statusCode, $exception)
+    public function testHandleErrors($statusCode, $errorCode, $exception)
     {
         $this->setExpectedException($exception);
 
-        $this->response->getStatusCode()->shouldBeCalled()->willReturn($statusCode);
-        $this->response->getBody()->shouldBeCalled()->willReturn(json_encode(['error' => ['message' => 'foo']]));
-        $this->api->get($this->response->reveal());
+        $this->response->expects($this->any())
+            ->method('getStatusCode')
+            ->will($this->returnValue($statusCode));
+
+        $this->response->expects($this->any())
+            ->method('getBody')
+            ->will($this->returnValue($this->getBody($errorCode)));
+
+        $this->api->get($this->response);
     }
 
     public function getResponses()
     {
         return [
-            [400,'CalendArt\Adapter\Office365\Exception\BadRequestException'],
-            [401,'CalendArt\Adapter\Office365\Exception\UnauthorizedException'],
-            [403,'CalendArt\Adapter\Office365\Exception\ForbiddenException'],
-            [404,'CalendArt\Adapter\Office365\Exception\NotFoundException'],
-            [405,'CalendArt\Adapter\Office365\Exception\MethodNotAllowedException'],
-            [406,'CalendArt\Adapter\Office365\Exception\BadRequestException'],
-            [409,'CalendArt\Adapter\Office365\Exception\ConflictException'],
-            [410,'CalendArt\Adapter\Office365\Exception\GoneException'],
-            [411,'CalendArt\Adapter\Office365\Exception\BadRequestException'],
-            [412,'CalendArt\Adapter\Office365\Exception\PreconditionException'],
-            [413,'CalendArt\Adapter\Office365\Exception\BadRequestException'],
-            [415,'CalendArt\Adapter\Office365\Exception\BadRequestException'],
-            [416,'CalendArt\Adapter\Office365\Exception\BadRequestException'],
-            [422,'CalendArt\Adapter\Office365\Exception\BadRequestException'],
-            [429,'CalendArt\Adapter\Office365\Exception\LimitExceededException'],
-            [500,'CalendArt\Adapter\Office365\Exception\InternalServerErrorException'],
-            [501,'CalendArt\Adapter\Office365\Exception\NotFoundException'],
-            [503,'CalendArt\Adapter\Office365\Exception\InternalServerErrorException'],
-            [507,'CalendArt\Adapter\Office365\Exception\LimitExceededException'],
-            [509,'CalendArt\Adapter\Office365\Exception\LimitExceededException'],
+            [400, 'Foo', 'CalendArt\Adapter\Office365\Exception\BadRequestException'],
+            [400, 'ErrorExecuteSearchStaleData', 'CalendArt\Adapter\Office365\Exception\ErrorExecuteSearchStaleDataException'],
+            [401, 'Foo', 'CalendArt\Adapter\Office365\Exception\UnauthorizedException'],
+            [403, 'Foo', 'CalendArt\Adapter\Office365\Exception\ForbiddenException'],
+            [404, 'Foo', 'CalendArt\Adapter\Office365\Exception\NotFoundException'],
+            [405, 'Foo', 'CalendArt\Adapter\Office365\Exception\MethodNotAllowedException'],
+            [406, 'Foo', 'CalendArt\Adapter\Office365\Exception\BadRequestException'],
+            [409, 'Foo', 'CalendArt\Adapter\Office365\Exception\ConflictException'],
+            [410, 'Foo', 'CalendArt\Adapter\Office365\Exception\GoneException'],
+            [411, 'Foo', 'CalendArt\Adapter\Office365\Exception\BadRequestException'],
+            [412, 'Foo', 'CalendArt\Adapter\Office365\Exception\PreconditionException'],
+            [413, 'Foo', 'CalendArt\Adapter\Office365\Exception\BadRequestException'],
+            [415, 'Foo', 'CalendArt\Adapter\Office365\Exception\BadRequestException'],
+            [416, 'Foo', 'CalendArt\Adapter\Office365\Exception\BadRequestException'],
+            [422, 'Foo', 'CalendArt\Adapter\Office365\Exception\BadRequestException'],
+            [429, 'Foo', 'CalendArt\Adapter\Office365\Exception\LimitExceededException'],
+            [500, 'Foo', 'CalendArt\Adapter\Office365\Exception\InternalServerErrorException'],
+            [501, 'Foo', 'CalendArt\Adapter\Office365\Exception\NotFoundException'],
+            [503, 'Foo', 'CalendArt\Adapter\Office365\Exception\InternalServerErrorException'],
+            [507, 'Foo', 'CalendArt\Adapter\Office365\Exception\LimitExceededException'],
+            [509, 'Foo', 'CalendArt\Adapter\Office365\Exception\LimitExceededException'],
         ];
+    }
+
+    protected function getBody($errorCode = 'Foo')
+    {
+        return json_encode([
+            'error' => [
+                'code' => $errorCode,
+                'message' => 'foo'
+            ]
+        ]);
     }
 }
 

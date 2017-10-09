@@ -12,6 +12,7 @@ trait ResponseHandler
      * @param ResponseInterface $response
      *
      * @throws Exception\BadRequestException
+     * @throws Exception\ErrorExecuteSearchStaleDataException
      * @throws Exception\UnauthorizedException
      * @throws Exception\ForbiddenException
      * @throws Exception\NotFoundException
@@ -25,6 +26,9 @@ trait ResponseHandler
     private function handleResponse(ResponseInterface $response)
     {
         $statusCode = (int) $response->getStatusCode();
+        $body = json_decode($response->getBody(), true);
+
+        $errorCode = isset($body['error']['code']) ? $body['error']['code'] : null;
 
         if ($statusCode >= 200 && $statusCode < 400) {
             return;
@@ -32,6 +36,11 @@ trait ResponseHandler
 
         switch ($statusCode) {
             case 400:
+                if ($errorCode === 'ErrorExecuteSearchStaleData') {
+                    throw new Exception\ErrorExecuteSearchStaleDataException($response);
+                } else {
+                    throw new Exception\BadRequestException($response);
+                }
             case 406:
             case 411:
             case 413:
