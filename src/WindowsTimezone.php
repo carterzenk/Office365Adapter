@@ -39,7 +39,7 @@ class WindowsTimezone
         'Mid-Atlantic Standard Time'                => 'America/Noronha',
         'Azores Standard Time'                      => 'Atlantic/Azores',
         'Cape Verde Standard Time'                  => 'Atlantic/Cape_Verde',
-        'GMT Standard Time'                         => 'Europe/London',
+        'GMT Standard Time'                         => 'UTC',
         'Greenwich Standard Time'                   => 'Africa/Abidjan',
         'Central Europe Standard Time'              => 'Europe/Belgrade',
         'Central European Standard Time'            => 'Europe/Warsaw',
