@@ -30,7 +30,6 @@ use Http\Discovery\UriFactoryDiscovery;
 
 use CalendArt\Adapter\AdapterInterface;
 
-use CalendArt\Adapter\Office365\Model\User;
 use CalendArt\Adapter\Office365\Api\CalendarApi;
 use CalendArt\Adapter\Office365\Api\EventApi;
 use CalendArt\Adapter\Office365\Api\MailApi;
@@ -63,9 +62,6 @@ class Office365Adapter implements AdapterInterface
 
     /** @var MailApi */
     private $mailApi;
-
-    /** @var User[] All the fetched and hydrated users, with an id as a key **/
-    protected static $users = [];
 
     /**
      * @param string $token access token delivered by azure's oauth system
@@ -140,24 +136,6 @@ class Office365Adapter implements AdapterInterface
     public function getTaskGroupApi()
     {
         throw new \Exception('The Microsoft Graph Task API is still in beta');
-    }
-
-    /**
-     * Build a User object based on given data
-     *
-     * @param array $data User data
-     *
-     * @return User
-     */
-    public static function buildUser(array $data)
-    {
-        $id = sha1($data['emailAddress']['address']);
-
-        if (!isset(self::$users[$id])) {
-            static::$users[$id] = User::hydrate($data['emailAddress']);
-        }
-
-        return static::$users[$id];
     }
 
     /**

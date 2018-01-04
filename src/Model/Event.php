@@ -23,7 +23,6 @@ use CalendArt\AbstractEvent;
 use CalendArt\EventParticipation as BaseEventParticipation;
 
 use CalendArt\Adapter\Office365\ReflectionTrait;
-use CalendArt\Adapter\Office365\Office365Adapter;
 use CalendArt\Adapter\Office365\WindowsTimezone;
 
 /**
@@ -94,6 +93,13 @@ class Event extends AbstractEvent
     /** @var string */
     private $htmlBody;
 
+    /** @var int */
+    private $type;
+
+    /**
+     * Event constructor.
+     * @param Calendar|null $calendar
+     */
     public function __construct(Calendar $calendar = null)
     {
         $this->calendar = $calendar;
@@ -347,7 +353,7 @@ class Event extends AbstractEvent
         $event->type = self::translateConstantToValue('TYPE_', $data['type']);
 
         if (isset($data['organizer'])) {
-            $event->owner = Office365Adapter::buildUser($data['organizer']);
+            $event->owner = User::hydrate($data['organizer']['emailAddress']);
             $event->owner->addEvent($event);
         }
 
@@ -361,7 +367,7 @@ class Event extends AbstractEvent
                 continue;
             }
 
-            $user = Office365Adapter::buildUser($attendee);
+            $user = User::hydrate($attendee['emailAddress']);
             $role = EventParticipation::ROLE_PARTICIPANT;
 
             if (null !== $event->owner && $event->owner->getId() === $user->getId()) {
