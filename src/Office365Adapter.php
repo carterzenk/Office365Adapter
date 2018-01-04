@@ -30,8 +30,10 @@ use Http\Discovery\UriFactoryDiscovery;
 
 use CalendArt\Adapter\AdapterInterface;
 
-use CalendArt\Adapter\Office365\Api;
 use CalendArt\Adapter\Office365\Model\User;
+use CalendArt\Adapter\Office365\Api\CalendarApi;
+use CalendArt\Adapter\Office365\Api\EventApi;
+use CalendArt\Adapter\Office365\Api\MailApi;
 use CalendArt\Adapter\Office365\Api\ResponseHandler;
 
 /**
@@ -52,6 +54,15 @@ class Office365Adapter implements AdapterInterface
 
     /** @var MessageFactory */
     private $messageFactory;
+
+    /** @var CalendarApi */
+    private $calendarApi;
+
+    /** @var EventApi */
+    private $eventApi;
+
+    /** @var MailApi */
+    private $mailApi;
 
     /** @var User[] All the fetched and hydrated users, with an id as a key **/
     protected static $users = [];
@@ -92,37 +103,31 @@ class Office365Adapter implements AdapterInterface
     /** {@inheritDoc} */
     public function getCalendarApi()
     {
-        static $api = null;
-
-        if (null === $api) {
-            $api = new Api\CalendarApi($this);
+        if ($this->calendarApi === null) {
+            $this->calendarApi = new CalendarApi($this);
         }
 
-        return $api;
+        return $this->calendarApi;
     }
 
     /** {@inheritDoc} */
     public function getEventApi()
     {
-        static $api = null;
-
-        if (null === $api) {
-            $api = new Api\EventApi($this);
+        if ($this->eventApi === null) {
+            $this->eventApi = new EventApi($this);
         }
 
-        return $api;
+        return $this->eventApi;
     }
 
     /** {@inheritDoc} */
     public function getMailApi()
     {
-        static $api = null;
-
-        if (null === $api) {
-            $api = new Api\MailApi($this);
+        if ($this->mailApi === null) {
+            $this->mailApi = new MailApi($this);
         }
 
-        return $api;
+        return $this->mailApi;
     }
 
     /** {@inheritDoc} */
@@ -148,16 +153,34 @@ class Office365Adapter implements AdapterInterface
     {
         $id = sha1($data['emailAddress']['address']);
 
-        if (!isset(static::$users[$id])) {
+        if (!isset(self::$users[$id])) {
             static::$users[$id] = User::hydrate($data['emailAddress']);
         }
 
         return static::$users[$id];
     }
 
+    /**
+     * @param $method
+     * @param $uri
+     * @param array $headers
+     * @param null $body
+     * @return array
+     * @throws Exception\BadRequestException
+     * @throws Exception\ConflictException
+     * @throws Exception\ErrorExecuteSearchStaleDataException
+     * @throws Exception\ForbiddenException
+     * @throws Exception\GoneException
+     * @throws Exception\InternalServerErrorException
+     * @throws Exception\LimitExceededException
+     * @throws Exception\MethodNotAllowedException
+     * @throws Exception\NotFoundException
+     * @throws Exception\PreconditionException
+     * @throws Exception\UnauthorizedException
+     * @throws \Exception
+     */
     public function sendRequest($method, $uri, array $headers = [], $body = null)
     {
-
         // deal with query string parameters
         if (isset($headers['query'])) {
             $uri = sprintf('%s?%s', $uri, implode('&', array_map(function ($k, $v) {
